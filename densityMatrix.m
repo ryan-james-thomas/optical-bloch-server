@@ -119,7 +119,7 @@ classdef densityMatrix < handle
         end
         
         
-        function self = integrate(self,dt,T)
+        function self = integrate(self,dt,T,method)
             %INTEGRATE Integrates the master equation for a given time
             %step and for a given total time
             %
@@ -127,6 +127,9 @@ classdef densityMatrix < handle
             %   for the density matrix as a function of time for a time
             %   step DT and for a total time T
             %
+            %   D = D.INTEGRATE(__,METHOD) uses METHOD for integration.
+            %   Use 'normal' or 'exp' for expm() and 'fast' for simple
+            %   inverse
             self.dt = dt;
             self.T = T;
             self.t = 0:self.dt:self.T;
@@ -146,9 +149,18 @@ classdef densityMatrix < handle
             % Integrate for the density matrix
             %
             %D_exp=(eye(size(M))-M*self.dt/2)\(eye(size(M))+M*self.dt/2);
-            D_exp = expm(M*dt);
-            for n = 2:numSteps
-                self.densityVec(:,n) = D_exp*self.densityVec(:,n-1);
+            if nargin < 4 || strcmpi(method,'exp') || strcmpi(method,'normal')
+                D_exp = expm(M*dt);
+                for n = 2:numSteps
+                    self.densityVec(:,n) = D_exp*self.densityVec(:,n-1);
+                end
+            elseif strcmpi(method,'fast')
+                I = eye(size(M));
+                for n = 2:numSteps
+                    self.densityVec(:,n) = (I - M*dt/2)\(I + M*dt/2)*self.densityVec(:,n-1);
+                end
+            else
+                error('Unknown method ''%s''!',method);
             end
         end
         

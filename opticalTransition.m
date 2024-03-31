@@ -105,14 +105,14 @@ classdef opticalTransition < handle
             % We've only calculated the upper halves of these matrices, so
             % now make them Hermitian
             %
-            self.coupling = sqrt(2)*(self.coupling+self.coupling');
+            self.coupling = sqrt(1)*(self.coupling+self.coupling');
             self.qMatrix = self.qMatrix+self.qMatrix';
             %
             % The dipole matrix is actually <a|er|b>, while the decay
             % matrix is |coupling|^2*TotalDecay
             %
             self.dipole = self.coupling*self.calcBareDipole;
-            self.decay = abs(self.coupling).^2*self.totalDecay;
+            self.decay = 2*abs(self.coupling).^2*self.totalDecay;
         end
         
         function decayOut = getDecayMatrix(self,U)
@@ -129,7 +129,7 @@ classdef opticalTransition < handle
             if nargin == 1
                 decayOut = self.decay;
             else
-                decayOut = abs(U*self.coupling*U').^2*self.totalDecay;
+                decayOut = 2*abs(U*self.coupling*U').^2*self.totalDecay;
             end
         end
         
